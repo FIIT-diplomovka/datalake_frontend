@@ -24,8 +24,12 @@ export default {
                 alert("Cannot be empty")
             }
             let formData = new FormData()
-            formData.append("file", this.file)
-            this.$axios.post("/upload", formData)
+            formData.append("user_file", this.file)
+            formData.append("file_size", this.file.size)
+            console.log(this.file.size)
+            this.$axios.post("/upload", formData).catch(function (error) {
+                console.log(error.toJSON())
+            })
             
         }
     }
