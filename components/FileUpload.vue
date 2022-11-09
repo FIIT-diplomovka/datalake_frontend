@@ -19,18 +19,20 @@ export default {
         }
     },
     methods: {
-        uploadFile(event) {
+        async uploadFile(event) {
             if (this.file === null) {
                 alert("Cannot be empty")
             }
             let formData = new FormData()
             formData.append("user_file", this.file)
             formData.append("file_size", this.file.size)
-            console.log(this.file.size)
-            this.$axios.post("/upload", formData).catch(function (error) {
+            let res = await this.$axios.post("/upload", formData).catch(function (error) {
                 console.log(error.toJSON())
+                this.$emit("uploadFileError", error.toJSON())
+                return
             })
-            
+            let object_info = res.data
+            this.$emit("uploadFile", object_info)
         }
     }
 
