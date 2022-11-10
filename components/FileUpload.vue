@@ -35,6 +35,5 @@ export default {
             this.$emit("uploadFile", object_info)
         }
     }
-
 }
 </script>

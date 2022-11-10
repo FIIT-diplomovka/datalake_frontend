@@ -8,6 +8,7 @@ export const state = () => ({
     setBucket(state, bucket) {
       state.bucket = bucket
     },
+
     setObjectName(state, objectName) {
         state.objectName = objectName
     }
