@@ -4,10 +4,15 @@
             <h2>Dublin Core metadata for <b>{{ objectName }}</b></h2>
         </v-row>
 
-        <v-row :style="{ visibility: loadingVisibility }" class="pb-5">
-            <span>Extracting metadata...</span>
+
+        <v-row v-if="isLoading" class="pb-5">
+            <span>Extracting metadata, please wait...</span>
             <v-progress-linear indeterminate></v-progress-linear>
         </v-row>
+        <v-row v-else class="pb-5">
+            <span>Extraction complete. <v-icon color="green" large>mdi-check</v-icon></span>
+        </v-row>
+
         <v-row>
             <v-container ref="dcm_form">
                 <v-form :disabled=formDisabled>
@@ -19,7 +24,8 @@
                     <v-row>
                         <v-text-field v-model="dublin_core.publisher.value" outlined label="Publisher"></v-text-field>
                         <v-spacer></v-spacer>
-                        <v-text-field v-model="dublin_core.contributor.value" outlined label="Contributor"></v-text-field>
+                        <v-text-field v-model="dublin_core.contributor.value" outlined label="Contributor">
+                        </v-text-field>
                     </v-row>
                     <v-row>
                         <v-text-field v-model="dublin_core.coverage.value" outlined label="Coverage"></v-text-field>
@@ -47,7 +53,8 @@
                         <v-text-field v-model="dublin_core.relation.value" outlined label="Relation"></v-text-field>
                     </v-row>
                     <v-row>
-                        <v-textarea v-model="dublin_core.description.value" outlined auto-grow label="Description"></v-textarea>
+                        <v-textarea v-model="dublin_core.description.value" outlined auto-grow label="Description">
+                        </v-textarea>
                     </v-row>
                 </v-form>
             </v-container>
@@ -111,6 +118,7 @@ export default {
             this.dublin_core.type.value = object_metadata.dcm_type
 
             this.formDisabled = false
+            this.isLoading = false
             this.loadingVisibility = 'hidden'
 
         }
@@ -118,6 +126,7 @@ export default {
     data() {
         return {
             loadingVisibility: 'visible',
+            isLoading: true,
             formDisabled: true,
             dublin_core: {
                 contributor: { value: "", hint: "An entity responsible for making contributions to the resource" },

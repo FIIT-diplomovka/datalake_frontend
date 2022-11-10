@@ -22,6 +22,7 @@ export default {
         async uploadFile(event) {
             if (this.file === null) {
                 alert("Cannot be empty")
+                return
             }
             let formData = new FormData()
             formData.append("user_file", this.file)
