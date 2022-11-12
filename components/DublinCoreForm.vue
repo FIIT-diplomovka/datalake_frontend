@@ -67,6 +67,7 @@
 export default {
     object: { bucket: "", name: "" },
     name: 'DublinCoreForm',
+
     props: {
         objectBucket: {
             type: String,
@@ -107,7 +108,7 @@ export default {
             this.dublin_core.date.value = object_metadata.dcm_date
             this.dublin_core.description.value = object_metadata.dcm_description
             this.dublin_core.format.value = object_metadata.dcm_format
-            this.dublin_core.identifier.value = object_metadata.etag
+            this.dublin_core.identifier.value = object_metadata.sha_256
             this.dublin_core.language.value = object_metadata.dcm_language
             this.dublin_core.publisher.value = object_metadata.dcm_publisher
             this.dublin_core.relation.value = object_metadata.dcm_relation
@@ -119,41 +120,48 @@ export default {
 
             this.formDisabled = false
             this.isLoading = false
-            this.loadingVisibility = 'hidden'
 
         }
     },
     data() {
         return {
-            loadingVisibility: 'visible',
             isLoading: true,
             formDisabled: true,
             dublin_core: {
-                contributor: { value: "", hint: "An entity responsible for making contributions to the resource" },
-                coverage: { value: "", hint: "The spatial or temporal topic of the resource, the spatial applicability of the resource, or the jurisdiction under which the resource is relevant" },
-                creator: { value: "", hint: "An entity primarily responsible for making the resource" },
-                date: { value: "", hint: "A point or period of time associated with an event in the lifecycle of the resource" },
-                description: { value: "", hint: "An account of the resource" },
-                format: { value: "", hint: "The file format, physical medium, or dimensions of the resource" },
-                identifier: { value: "", hint: "An unambiguous reference to the resource within a given context" },
-                language: { value: "", hint: "A language of the resource" },
-                publisher: { value: "", hint: "An entity responsible for making the resource available" },
-                relation: { value: "", hint: "A related resource" },
-                rights: { value: "", hint: "Information about rights held in and over the resource" },
-                source: { value: "", hint: "A related resource from which the described resource is derived" },
-                subject: { value: "", hint: "The topic of the resource" },
-                title: { value: "", hint: "A name given to the resource" },
-                type: { value: "", hint: "The nature or genre of the resource" },
+                contributor: { value: "", default: "Dominik Horvath", hint: "An entity responsible for making contributions to the resource" },
+                coverage: { value: "", default: "Machine learning research", hint: "The spatial or temporal topic of the resource, the spatial applicability of the resource, or the jurisdiction under which the resource is relevant" },
+                creator: { value: "", default: "John Doe", hint: "An entity primarily responsible for making the resource" },
+                date: { value: "", default: "2022-02-05", hint: "A point or period of time associated with an event in the lifecycle of the resource" },
+                description: { value: "", default: "Dataset for training ML models focused on self driving cars. Contains only generated (fake) data.", hint: "An account of the resource" },
+                format: { value: "", default: "CSV", hint: "The file format, physical medium, or dimensions of the resource" },
+                identifier: { value: "", default: "5112697e6c3d7999ddf7979948135b1f94f6add479911795fb341d6ea545a28a", hint: "An unambiguous reference to the resource within a given context" },
+                language: { value: "", default: "en", hint: "A language of the resource" },
+                publisher: { value: "", default: "FIIT STU", hint: "An entity responsible for making the resource available" },
+                relation: { value: "", default: "cars.csv", hint: "A related resource" },
+                rights: { value: "", default: "GNU licence",hint: "Information about rights held in and over the resource" },
+                source: { value: "", default: "https://kaggle.com", hint: "A related resource from which the described resource is derived" },
+                subject: { value: "", default:"Generated data from self driving simulations", hint: "The topic of the resource" },
+                title: { value: "", default: "default_cars.csv", hint: "A name given to the resource" },
+                type: { value: "", default: "comma-separated values", hint: "The nature or genre of the resource" },
             }
         }
     },
 
     mounted() {
-        this.loadingVisibility = "visible"
         this.$options.object.bucket = this.objectBucket
         this.$options.object.name = this.objectName
         this.getMetadata()
-
+        // press Lshift + ~ to autofill with default values
+        window.addEventListener("keydown", e => { 
+            if (e.code === "Backquote" && e.shiftKey) {
+                console.log("Fill DCM automatically")
+                for (const [key, value] of Object.entries(this.dublin_core)) {
+                    if (this.dublin_core[key].value === "") {
+                        this.dublin_core[key].value = this.dublin_core[key].default
+                    }
+                }
+            }
+    });
     },
 
 

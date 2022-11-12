@@ -23,8 +23,7 @@ export default {
     uploadFile(objectInfo) {
       this.$store.commit('new_file_upload/setBucket', objectInfo.bucket)
       this.$store.commit('new_file_upload/setObjectName',  objectInfo.name)
-      console.log(this.$store.state.new_file_upload)
-      this.$router.push("/new")
+      this.$router.push(`/new/${objectInfo.b64}`)
     }
   }
 }
