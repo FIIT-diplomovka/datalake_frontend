@@ -110,7 +110,7 @@ export default {
                 let dcm_key = `dcm_${key}`
                 object_info["metadata"][dcm_key] = this.form.dublin_core[key].value
             }
-            let res = await this.$axios.post("/submit_new", object_info).catch(function (error) {
+            let res = await this.$axios.post("/write/submit_new", object_info).catch(function (error) {
                 console.log(error.toJSON())
                 alert("Error when trying to submit the data. Check console.")
                 return
@@ -128,7 +128,7 @@ export default {
             let object_metadata
             let seconds_waited = 0
             while (true) {
-                let res = await this.$axios.post("/check_stage", this.$options.object).catch(function (error) {
+                let res = await this.$axios.post("/read/check_stage", this.$options.object).catch(function (error) {
                     console.log(error.toJSON())
                     return
                 })

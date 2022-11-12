@@ -27,7 +27,7 @@ export default {
             let formData = new FormData()
             formData.append("user_file", this.file)
             formData.append("file_size", this.file.size)
-            let res = await this.$axios.post("/upload", formData).catch(function (error) {
+            let res = await this.$axios.post("/write/upload", formData).catch(function (error) {
                 console.log(error.toJSON())
                 this.$emit("uploadFileError", error.toJSON())
                 return
