@@ -115,6 +115,9 @@ export default {
                 alert("Error when trying to submit the data. Check console.")
                 return
             })
+            if (res.status === 201 || res.status === 200) {
+                this.$router.push("/")
+            }
 
 
         },
