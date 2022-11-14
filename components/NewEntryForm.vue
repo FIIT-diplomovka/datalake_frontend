@@ -2,7 +2,7 @@
     <v-container>
         <v-row>
             <v-col>
-                <h2>Dublin Core metadata for <b>{{ objectName }}</b></h2>
+                <h2>Metadata for <b>{{ objectName }}</b></h2>
             </v-col>
             <v-col class="d-flex justify-end">
                 <v-btn @click="submitForm()" color="primary">Submit</v-btn>
@@ -25,7 +25,11 @@
         <v-row>
             <v-container ref="dcm_form">
                 <v-col>
+                    <!-- dublin core -->
                     <v-form :disabled=formDisabled>
+                        <v-row>
+                            <h3>Dublin Core</h3>
+                        </v-row>
                         <v-row>
                             <v-text-field v-model="form.dublin_core.title.value" outlined label="Title"></v-text-field>
                             <v-spacer></v-spacer>
@@ -78,6 +82,31 @@
                             </v-textarea>
                         </v-row>
                     </v-form>
+                    <!-- Tags -->
+                    <v-form v-on:submit.prevent>
+                        <v-row>
+                            <h3>Tags</h3>
+                        </v-row>
+                        <v-row>
+                            <v-col>
+                                <v-text-field @keyup.enter="addTag()" v-model="tag" label="Start typing tags" outlined>
+                                </v-text-field>
+                            </v-col>
+                            <v-col>
+                                <v-btn @click="addTag()" class="ma-1" color="primary" dark>
+                                    <v-icon dark>
+                                        mdi-plus-circle
+                                    </v-icon>
+                                    Add
+                                </v-btn>
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <div>
+                                <v-chip class="ma-2" large v-for="tag in form.tags">{{ tag }}</v-chip>
+                            </div>
+                        </v-row>
+                    </v-form>
                 </v-col>
             </v-container>
         </v-row>
@@ -88,7 +117,7 @@
 <script>
 export default {
     object: { bucket: "", name: "" },
-    name: 'DublinCoreForm',
+    name: 'NewEntryForm',
 
     props: {
         objectBucket: {
@@ -101,15 +130,26 @@ export default {
         }
     },
     methods: {
+        addTag() {
+            if (this.tag === "") {
+                return
+            }
+            this.form.tags.push(this.tag)
+            this.tag = ""
+        },
+
         async submitForm() {
             let object_info = {
                 object: this.$options.object,
-                metadata: {}
+                dcm: {},
+                tags: []
             }
             for (const [key, value] of Object.entries(this.form.dublin_core)) {
                 let dcm_key = `dcm_${key}`
-                object_info["metadata"][dcm_key] = this.form.dublin_core[key].value
+                object_info["dcm"][dcm_key] = this.form.dublin_core[key].value
             }
+
+            object_info["tags"] = this.form.tags
             let res = await this.$axios.post("/write/submit_new", object_info).catch(function (error) {
                 console.log(error.toJSON())
                 alert("Error when trying to submit the data. Check console.")
@@ -169,6 +209,7 @@ export default {
         return {
             isLoading: true,
             formDisabled: true,
+            tag: "",
             form: {
                 dublin_core: {
                     contributor: { value: "", default: "Dominik Horvath", hint: "An entity responsible for making contributions to the resource" },
@@ -186,7 +227,8 @@ export default {
                     subject: { value: "", default: "Generated data from self driving simulations", hint: "The topic of the resource" },
                     title: { value: "", default: "default_cars.csv", hint: "A name given to the resource" },
                     type: { value: "", default: "comma-separated values", hint: "The nature or genre of the resource" },
-                }
+                },
+                tags: []
             }
         }
     },
@@ -199,11 +241,14 @@ export default {
         window.addEventListener("keydown", e => {
             if (e.code === "Backquote" && e.shiftKey) {
                 console.log("Fill DCM automatically")
+                // fill dublin core
                 for (const [key, value] of Object.entries(this.form.dublin_core)) {
                     if (this.form.dublin_core[key].value === "") {
                         this.form.dublin_core[key].value = this.form.dublin_core[key].default
                     }
                 }
+                // fill tags
+                this.form.tags.push("cars", "machine learning", "training")
             }
         });
     },

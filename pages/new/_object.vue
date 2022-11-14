@@ -6,7 +6,7 @@
       </v-col>
     </v-row>
     <v-row>
-      <DublinCoreForm :object-bucket="this.$options.object.bucket" :object-name="this.$options.object.name"></DublinCoreForm>
+      <NewEntryForm :object-bucket="this.$options.object.bucket" :object-name="this.$options.object.name"></NewEntryForm>
     </v-row>
   </div>
 </template>
