@@ -30,7 +30,7 @@
                 </v-card-text>
 
                 <v-card-actions>
-                    <v-btn color="primary" text @click="reserve">
+                    <v-btn color="primary" nuxt :to="`/detail/${o.id}`" text @click="reserve">
                         Details
                     </v-btn>
                 </v-card-actions>
