@@ -103,7 +103,7 @@
                         </v-row>
                         <v-row>
                             <div>
-                                <v-chip class="ma-2" large v-for="tag in form.tags">{{ tag }}</v-chip>
+                                <v-chip class="ma-2" large v-for="(tag, index) in form.tags" :key="index">{{ tag }}</v-chip>
                             </div>
                         </v-row>
                     </v-form>
@@ -134,7 +134,10 @@ export default {
             if (this.tag === "") {
                 return
             }
-            this.form.tags.push(this.tag)
+            this.tag = this.tag.replace(",", " ")
+            if (!this.form.tags.includes(this.tag)) {
+                this.form.tags.push(this.tag)
+            }
             this.tag = ""
         },
 

@@ -67,7 +67,7 @@
                     <h3>Tags</h3>
                 </v-row>
                 <v-row>
-                    <v-chip class="ma-2" large v-for="tag in current_object.tags">{{ tag }}</v-chip>
+                    <v-chip class="ma-2" large v-for="(tag, index) in current_object.tags" :key="index">{{ tag }}</v-chip>
                 </v-row>
             </v-container>
         </v-row>
