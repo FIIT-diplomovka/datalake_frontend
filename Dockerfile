@@ -8,7 +8,7 @@ COPY package.json .
 RUN npm install 
 
 COPY . .
-RUN sed -i 's/127.0.0.1:5000/flask_backend:5000/g' nuxt.config.js
+RUN sed -i 's/127.0.0.1:5000/backend:5000/g' nuxt.config.js
 RUN npm run generate
 
 #### NGINX FOR Single Page Application ####
