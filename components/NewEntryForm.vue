@@ -103,7 +103,7 @@
                         </v-row>
                         <v-row>
                             <div>
-                                <v-chip class="ma-2" large v-for="(tag, index) in form.tags" :key="index">{{ tag }}</v-chip>
+                                <v-chip close @click:close="form.tags = form.tags.filter(item => item !== tag)" class="ma-2" large v-for="(tag, index) in form.tags" :key="index">{{ tag }}</v-chip>
                             </div>
                         </v-row>
                     </v-form>
