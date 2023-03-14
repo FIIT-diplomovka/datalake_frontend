@@ -176,7 +176,7 @@ export default {
                     return
                 })
                 if (res.status === 200) {
-                    object_metadata = res.data
+                    object_metadata = res.data.metadata
                     break;
                 }
                 // TODO: handle this
