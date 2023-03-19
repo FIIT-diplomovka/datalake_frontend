@@ -5,20 +5,36 @@
                 <h2>Metadata for <b>{{ objectName }}</b></h2>
             </v-col>
             <v-col class="d-flex justify-end">
-                <v-btn @click="submitForm()" color="primary">Submit</v-btn>
+                <v-btn @click="submitForm()" color="success">Submit</v-btn>
             </v-col>
         </v-row>
+        <v-row>
+            <v-col></v-col>
+        </v-row>
 
-
-        <v-row v-if="isLoading">
-            <v-col>
+        <v-row >
+            <v-col v-if="isLoading">
                 <span>Extracting metadata, please wait...</span>
                 <v-progress-linear indeterminate></v-progress-linear>
             </v-col>
+            <v-col v-else>
+                <span>Extraction complete.  <v-icon color="green" large>mdi-check</v-icon></span>
+            </v-col>
+
+
+            <v-col v-if="!isLoading">
+                <v-row>
+                    <v-select v-model="selected_method" persistent-hint hint="Which tool is used to analyze current file. Default is Droid (static)" label="Metadata extraction method" outlined :items="metadata_extraction_methods"></v-select>
+                    <v-btn color="primary" @click="analyze()" class="ma-2">Analyze</v-btn>
+                </v-row>
+            </v-col>
         </v-row>
-        <v-row v-else>
-            <v-col>
-                <span>Extraction complete. <v-icon color="green" large>mdi-check</v-icon></span>
+
+        <v-row>
+            <v-col v-if="!isLoading">
+                <v-alert v-if="form.is_malware === 1" type="error">This file was identified as malware</v-alert>
+                <v-alert v-if="form.is_malware === 0" type="success">This file was identified as safe</v-alert>
+                <v-alert outlined v-if="form.is_malware === 'unsupported'" type="warning">This file cannot be checked for malware presence as this file type is not supported for this type of check</v-alert>
             </v-col>
         </v-row>
 
@@ -118,6 +134,7 @@
 export default {
     object: { bucket: "", name: "" },
     name: 'NewEntryForm',
+    
 
     props: {
         objectBucket: {
@@ -130,6 +147,32 @@ export default {
         }
     },
     methods: {
+        async analyze() {
+            if (this.selected_method === "")
+                return
+            let payload = this.$options.object
+            let extraction_method = this.selected_method
+            if (extraction_method === "" || extraction_method.toLowerCase().includes("droid")) {
+                extraction_method = "droid"
+                this.last_used_method = "droid (static)"
+            } else if (extraction_method.toLowerCase().includes("tika")){
+                extraction_method = "tika"
+                this.last_used_method = "tika (dynamic)"
+            }
+            payload.method = extraction_method
+            let res = await this.$axios.post("/write/restart_analysis", payload).catch(function (error) {
+                console.log(error.toJSON())
+                alert("Error when trying to submit the data. Check console.")
+                return
+            })
+            if (res.status !== 200) {
+                console.error("Somwthing went wrong, server response was: ", res.status)
+                return
+            }
+            this.getMetadata()
+
+        },
+
         addTag() {
             if (this.tag === "") {
                 return
@@ -145,7 +188,8 @@ export default {
             let object_info = {
                 object: this.$options.object,
                 dcm: {},
-                tags: []
+                tags: [],
+                is_malware: 0
             }
             for (const [key, value] of Object.entries(this.form.dublin_core)) {
                 let dcm_key = `dcm_${key}`
@@ -153,6 +197,7 @@ export default {
             }
 
             object_info["tags"] = this.form.tags
+            object_info["malware"] = this.form.is_malware
             let res = await this.$axios.post("/write/submit_new", object_info).catch(function (error) {
                 console.log(error.toJSON())
                 alert("Error when trying to submit the data. Check console.")
@@ -164,9 +209,33 @@ export default {
 
 
         },
+
+        
+
+        async checkMalware() {
+            while (true) {
+                let res = await this.$axios.post("/read/check_malware", this.$options.object).catch(function (error) {
+                    console.log(error.toJSON())
+                    return
+                })
+                if (res.status === 200) {
+                    console.log("MALWARE CHECK IS DONE")
+                    break;
+                }
+                // TODO: handle this
+                if (seconds_waited > 60) {
+                    console.log("Something might be wrong...")
+                }
+                // 2 sec delay between each requests
+                await new Promise(r => setTimeout(r, 2000));
+                seconds_waited += 2
+            }
+        },
+
         // start checking if object is parsed
         async getMetadata() {
             this.formDisabled = true
+            this.isLoading = true
             this.loadingVisibility = 'visible'
             let object_metadata
             let seconds_waited = 0
@@ -202,6 +271,7 @@ export default {
             this.form.dublin_core.subject.value = object_metadata.dcm_subject
             this.form.dublin_core.title.value = object_metadata.dcm_title
             this.form.dublin_core.type.value = object_metadata.dcm_type
+            this.form.is_malware = object_metadata.malware
 
             this.formDisabled = false
             this.isLoading = false
@@ -212,6 +282,9 @@ export default {
         return {
             isLoading: true,
             formDisabled: true,
+            metadata_extraction_methods: ["tika (dynamic)", "droid (static)"],
+            selected_method: "",
+            last_used_method: "",
             tag: "",
             form: {
                 dublin_core: {
@@ -231,7 +304,8 @@ export default {
                     title: { value: "", default: "default_cars.csv", hint: "A name given to the resource" },
                     type: { value: "", default: "comma-separated values", hint: "The nature or genre of the resource" },
                 },
-                tags: []
+                tags: [],
+                is_malware: 0,
             }
         }
     },
@@ -240,6 +314,7 @@ export default {
         this.$options.object.bucket = this.objectBucket
         this.$options.object.name = this.objectName
         this.getMetadata()
+        // this.checkMalware()
         // press Lshift + ~ to autofill with default values
         window.addEventListener("keydown", e => {
             if (e.code === "Backquote" && e.shiftKey) {

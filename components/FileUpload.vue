@@ -3,7 +3,7 @@
         <v-col>
             <h2>Please select a file</h2>
             <v-file-input v-model="file" show-size></v-file-input>
-            <v-btn color="primary" @click="uploadFile">
+            <v-btn color="success" @click="uploadFile">
                 Upload to data lake
             </v-btn>
         </v-col>

@@ -2,7 +2,7 @@
   <v-container>
     <v-row justify="center" align="center">
       <v-col class="text-right">
-        <v-btn color="primary" nuxt to="/upload">
+        <v-btn color="success" nuxt to="/upload">
           Upload to datalake
         </v-btn>
       </v-col>
