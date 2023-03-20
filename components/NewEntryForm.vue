@@ -152,24 +152,40 @@ export default {
                 return
             let payload = this.$options.object
             let extraction_method = this.selected_method
-            if (extraction_method === "" || extraction_method.toLowerCase().includes("droid")) {
+
+            if (extraction_method === "" || extraction_method === "droid (static)") {
                 extraction_method = "droid"
                 this.last_used_method = "droid (static)"
-            } else if (extraction_method.toLowerCase().includes("tika")){
+            } else if (extraction_method === "tika (static)"){
                 extraction_method = "tika"
                 this.last_used_method = "tika (dynamic)"
+            } else if (extraction_method === "droid (static) + GPT-3") {
+                console.log("droid + gpt3")
+                extraction_method = "droid"
+                this.use_gpt3 = 1
+                this.last_used_method = "droid (static) + GPT-3"
+            } else if (extraction_method === "tika (dynamic) + GPT-3") {
+                console.log("tika + gpt3")
+                extraction_method = "tika"
+                this.use_gpt3 = 1
+                this.last_used_method = "tika (dynamic) + GPT-3"
             }
+
             payload.method = extraction_method
+            payload.use_gpt3 = this.use_gpt3
             let res = await this.$axios.post("/write/restart_analysis", payload).catch(function (error) {
                 console.log(error.toJSON())
                 alert("Error when trying to submit the data. Check console.")
+                this.use_gpt3 = 0
                 return
             })
             if (res.status !== 200) {
                 console.error("Somwthing went wrong, server response was: ", res.status)
+                this.use_gpt3 = 0
                 return
             }
             this.getMetadata()
+            this.use_gpt3 = 0
 
         },
 
@@ -282,9 +298,10 @@ export default {
         return {
             isLoading: true,
             formDisabled: true,
-            metadata_extraction_methods: ["tika (dynamic)", "droid (static)"],
+            metadata_extraction_methods: ["tika (dynamic)", "droid (static)", "tika (dynamic) + GPT-3", "droid (static) + GPT-3"],
             selected_method: "",
             last_used_method: "",
+            use_gpt3: 0,
             tag: "",
             form: {
                 dublin_core: {
