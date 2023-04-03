@@ -19,37 +19,37 @@
                 </v-row>
                 <v-row>
                     <p class="mr-10"><b>Title:</b> {{ current_object.dublin_core.title.value }}</p>
-                    
+
                     <p class="mr-10"><b>Creator:</b> {{ current_object.dublin_core.creator.value }}</p>
                 </v-row>
                 <v-row>
                     <p class="mr-10"><b>Publisher:</b> {{ current_object.dublin_core.publisher.value }}</p>
-                    
+
                     <p class="mr-10"><b>Contributor:</b> {{ current_object.dublin_core.contributor.value }}</p>
                 </v-row>
                 <v-row>
                     <p class="mr-10"><b>Coverage:</b> {{ current_object.dublin_core.coverage.value }}</p>
-                    
+
                     <p class="mr-10"><b>Subject:</b> {{ current_object.dublin_core.subject.value }}</p>
                 </v-row>
                 <v-row>
                     <p class="mr-10"><b>Date:</b> {{ current_object.dublin_core.date.value }}</p>
-                    
+
                     <p class="mr-10"><b>Language:</b> {{ current_object.dublin_core.language.value }}</p>
                 </v-row>
                 <v-row>
                     <p class="mr-10"><b>Format:</b> {{ current_object.dublin_core.format.value }}</p>
-                    
+
                     <p class="mr-10"><b>Type:</b> {{ current_object.dublin_core.type.value }}</p>
                 </v-row>
                 <v-row>
                     <p class="mr-10"><b>identifier:</b> {{ current_object.dublin_core.identifier.value }}</p>
-                    
+
                     <p class="mr-10"><b>Rights:</b> {{ current_object.dublin_core.rights.value }}</p>
                 </v-row>
                 <v-row>
                     <p class="mr-10"><b>Source:</b> {{ current_object.dublin_core.source.value }}</p>
-                    
+
                     <p class="mr-10"><b>Relation:</b> {{ current_object.dublin_core.relation.value }}</p>
                 </v-row>
                 <v-row>
@@ -62,14 +62,22 @@
         </v-row>
 
         <v-row>
-            <v-container>
+            <v-container class="mb-15">
                 <v-row>
-                    <h3>Tags</h3>
+                    <h3>Tags:</h3>
                 </v-row>
                 <v-row>
                     <v-chip class="ma-2" large v-for="(tag, index) in current_object.tags" :key="index">{{ tag }}</v-chip>
                 </v-row>
             </v-container>
+        </v-row>
+        <v-row class="mt-20 mb-5">
+            <v-divider></v-divider>
+        </v-row>
+        <v-row>
+            <v-btn color="primary" @click="downloadFile">
+                Download file
+            </v-btn>
         </v-row>
 
 
@@ -108,6 +116,31 @@ export default {
                 },
                 tags: []
             }
+        }
+    },
+
+    methods: {
+        async downloadFile() {
+            const download_id = this.current_object.dublin_core.title.value + "@" + this.current_object.dublin_core.identifier.value
+            const res = await this.$axios.get(`/read/download_url/${download_id}`).catch(function (error) {
+                console.log(error.toJSON())
+                return
+            })
+            fetch(res.data)
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = this.current_object.dublin_core.title.value;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
         }
     },
 
